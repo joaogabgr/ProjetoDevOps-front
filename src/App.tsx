@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { RequireAuth } from './auth/RequireAuth';
+import { ParametersListPage } from './features/parameters/ParametersListPage';
 import { StationCreatePage } from './features/stations/StationCreatePage';
 import { StationEditPage } from './features/stations/StationEditPage';
 import { StationsListPage } from './features/stations/StationsListPage';
@@ -15,6 +16,7 @@ export function App() {
         <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
           <Route path="estacoes" element={<StationsListPage />} />
+          <Route path="parametros" element={<ParametersListPage />} />
           <Route path="estacoes/nova" element={<StationCreatePage />} />
           <Route path="estacoes/:id/editar" element={<StationEditPage />} />
         </Route>
