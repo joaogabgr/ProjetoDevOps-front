@@ -9,5 +9,7 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     restoreMocks: true,
+    // Testes de formulário digitam campo por campo; em máquina carregada passam de 5 s.
+    testTimeout: 20000,
   },
 });
