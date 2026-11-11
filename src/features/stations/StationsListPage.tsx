@@ -1,15 +1,30 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import '../../components/filters.css';
 import { messageOf, type Page } from '../../api/client';
 import { Can } from '../../auth/Can';
 import { useFeedback } from '../../components/Feedback';
 import { Pagination } from '../../components/Pagination';
-import { BIOME_LABEL, type Station } from '../../api/types';
+import { BIOME_LABEL, type Biome, type Station } from '../../api/types';
 import { stationsApi, type StationFilters } from './stationsApi';
 
 export function StationsListPage() {
   const [params, setParams] = useSearchParams();
-  const filters: StationFilters = { page: Number(params.get('pagina') ?? 1) };
+  const filters: StationFilters = {
+    page: Number(params.get('pagina') ?? 1),
+    name: params.get('nome') ?? '',
+    biome: (params.get('bioma') ?? '') as Biome | '',
+    community: params.get('comunidade') ?? '',
+    status: (params.get('situacao') ?? '') as StationFilters['status'],
+  };
+
+  function setFilter(key: string, value: string) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    next.delete('pagina');
+    setParams(next);
+  }
   const filtersKey = JSON.stringify(filters);
   const [result, setResult] = useState<Page<Station> | null>(null);
   const [error, setError] = useState('');
@@ -58,6 +73,36 @@ export function StationsListPage() {
           </Link>
         </Can>
       </header>
+
+      <form className="filters" role="search" onSubmit={(event) => event.preventDefault()}>
+        <label>
+          Nome
+          <input value={filters.name} onChange={(event) => setFilter('nome', event.target.value)} />
+        </label>
+        <label>
+          Bioma
+          <select value={filters.biome} onChange={(event) => setFilter('bioma', event.target.value)}>
+            <option value="">Todos</option>
+            {Object.entries(BIOME_LABEL).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Comunidade
+          <input value={filters.community} onChange={(event) => setFilter('comunidade', event.target.value)} />
+        </label>
+        <label>
+          Situação
+          <select value={filters.status} onChange={(event) => setFilter('situacao', event.target.value)}>
+            <option value="">Todas</option>
+            <option value="active">Ativas</option>
+            <option value="inactive">Desativadas</option>
+          </select>
+        </label>
+      </form>
 
       {error && (
         <p className="page-error" role="alert">
