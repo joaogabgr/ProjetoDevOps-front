@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { messageOf, type Page } from '../../api/client';
+import { Pagination } from '../../components/Pagination';
 import { BIOME_LABEL, type Station } from '../../api/types';
 import { stationsApi, type StationFilters } from './stationsApi';
 
 export function StationsListPage() {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const filters: StationFilters = { page: Number(params.get('pagina') ?? 1) };
   const filtersKey = JSON.stringify(filters);
   const [result, setResult] = useState<Page<Station> | null>(null);
@@ -75,6 +76,18 @@ export function StationsListPage() {
             </tbody>
           </table>
         </div>
+      )}
+      {result && (
+        <Pagination
+          page={result.meta.page}
+          totalPages={result.meta.totalPages}
+          total={result.meta.total}
+          onChange={(next) => {
+            const nextParams = new URLSearchParams(params);
+            nextParams.set('pagina', String(next));
+            setParams(nextParams);
+          }}
+        />
       )}
     </section>
   );
