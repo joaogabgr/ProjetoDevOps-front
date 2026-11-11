@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { messageOf } from '../../api/client';
+import { useFeedback } from '../../components/Feedback';
 import type { TypeParameter } from '../../api/types';
 import { parametersApi } from './parametersApi';
 
 export function ParametersListPage() {
   const [items, setItems] = useState<TypeParameter[] | null>(null);
   const [error, setError] = useState('');
+  const feedback = useFeedback();
 
   const load = useCallback(async () => {
     setError('');
@@ -20,6 +22,16 @@ export function ParametersListPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function remove(parameter: TypeParameter) {
+    try {
+      await parametersApi.remove(parameter.id);
+      feedback.success('Parâmetro excluído.');
+      await load();
+    } catch (caught) {
+      feedback.error(messageOf(caught));
+    }
+  }
 
   return (
     <section className="page">
@@ -61,6 +73,9 @@ export function ParametersListPage() {
                   <td data-label="Casas decimais">{parameter.numberOfDecimalCases}</td>
                   <td className="table__actions">
                     <Link to={`/parametros/${parameter.id}/editar`}>Editar</Link>
+                    <button type="button" className="link-button link-button--danger" onClick={() => remove(parameter)}>
+                      Excluir
+                    </button>
                   </td>
                 </tr>
               ))}
