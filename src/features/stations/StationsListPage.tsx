@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { messageOf, type Page } from '../../api/client';
+import { Can } from '../../auth/Can';
 import { useFeedback } from '../../components/Feedback';
 import { Pagination } from '../../components/Pagination';
 import { BIOME_LABEL, type Station } from '../../api/types';
@@ -51,9 +52,11 @@ export function StationsListPage() {
     <section className="page">
       <header className="page-header">
         <h1>Estações</h1>
-        <Link to="/estacoes/nova" className="button">
-          Nova estação
-        </Link>
+        <Can permission="MANAGE_STATIONS">
+          <Link to="/estacoes/nova" className="button">
+            Nova estação
+          </Link>
+        </Can>
       </header>
 
       {error && (
@@ -91,6 +94,7 @@ export function StationsListPage() {
                     <span className={station.active ? 'tag tag--ok' : 'tag'}>{station.active ? 'Ativa' : 'Desativada'}</span>
                   </td>
                   <td className="table__actions">
+                    <Can permission="MANAGE_STATIONS">
                     <Link to={`/estacoes/${station.id}/editar`}>Editar</Link>
                     <button type="button" className="link-button" onClick={() => toggleActive(station)}>
                       {station.active ? 'Desativar' : 'Reativar'}
@@ -98,6 +102,7 @@ export function StationsListPage() {
                     <button type="button" className="link-button link-button--danger" onClick={() => remove(station)}>
                       Excluir
                     </button>
+                    </Can>
                   </td>
                 </tr>
               ))}
