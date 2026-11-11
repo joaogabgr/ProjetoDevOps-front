@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { messageOf, type Page } from '../../api/client';
+import { useFeedback } from '../../components/Feedback';
 import { Pagination } from '../../components/Pagination';
 import { BIOME_LABEL, type Station } from '../../api/types';
 import { stationsApi, type StationFilters } from './stationsApi';
@@ -11,6 +12,7 @@ export function StationsListPage() {
   const filtersKey = JSON.stringify(filters);
   const [result, setResult] = useState<Page<Station> | null>(null);
   const [error, setError] = useState('');
+  const feedback = useFeedback();
 
   const load = useCallback(async () => {
     setError('');
@@ -24,6 +26,26 @@ export function StationsListPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function toggleActive(station: Station) {
+    try {
+      await stationsApi.setActive(station.id, !station.active);
+      feedback.success(station.active ? 'Estação desativada.' : 'Estação reativada.');
+      await load();
+    } catch (caught) {
+      feedback.error(messageOf(caught));
+    }
+  }
+
+  async function remove(station: Station) {
+    try {
+      await stationsApi.remove(station.id);
+      feedback.success('Estação excluída.');
+      await load();
+    } catch (caught) {
+      feedback.error(messageOf(caught));
+    }
+  }
 
   return (
     <section className="page">
@@ -70,6 +92,12 @@ export function StationsListPage() {
                   </td>
                   <td className="table__actions">
                     <Link to={`/estacoes/${station.id}/editar`}>Editar</Link>
+                    <button type="button" className="link-button" onClick={() => toggleActive(station)}>
+                      {station.active ? 'Desativar' : 'Reativar'}
+                    </button>
+                    <button type="button" className="link-button link-button--danger" onClick={() => remove(station)}>
+                      Excluir
+                    </button>
                   </td>
                 </tr>
               ))}
