@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { fieldErrorsOf, messageOf } from '../../api/client';
 import { BIOME_LABEL, type Biome } from '../../api/types';
+import '../../components/readonly-field.css';
 import { describedBy, Field } from '../../components/Field';
 import { useFeedback } from '../../components/Feedback';
 
@@ -103,7 +104,14 @@ export function StationForm({ mode, initial = EMPTY_STATION, submitLabel, onSubm
     <form className="form" onSubmit={submit} noValidate data-mode={mode}>
       <div className="form__grid">
         <Field id="uuid" label="Identificador da placa" error={errors.uuid} hint="Ex.: PCD-PAN-03. Não muda depois de criado.">
-          <input id="uuid" value={values.uuid} onChange={set('uuid')} aria-describedby={describedBy('uuid', errors.uuid)} />
+          <input
+            id="uuid"
+            value={values.uuid}
+            onChange={set('uuid')}
+            readOnly={mode === 'edit'}
+            aria-readonly={mode === 'edit'}
+            aria-describedby={describedBy('uuid', errors.uuid)}
+          />
         </Field>
         <Field id="name" label="Nome" error={errors.name}>
           <input id="name" value={values.name} onChange={set('name')} aria-describedby={describedBy('name', errors.name)} />
