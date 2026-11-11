@@ -1,40 +1,29 @@
-# ProjetoDevOps - Front-end
+# Vigia das Águas – Front-end
 
-Interface web da plataforma de monitoramento ambiental da Tecsus: visualização
-dos dados das estações meteorológicas, dashboards interativos, gestão de
-estações, parâmetros, alertas e usuários.
+Aplicação web do sistema de monitoramento comunitário e prevenção de enchentes do Instituto Vigia das Águas: painéis das estações, cadastros de estações, parâmetros, regras de alerta e usuários, relatórios e o painel público do nível do rio.
 
-## Repositórios do projeto
+## Onde está cada coisa
 
-| Repositório | Conteúdo |
+| O quê | Onde |
 |---|---|
-| [ProjetoDevOps](https://github.com/joaogabgr/ProjetoDevOps) | Documentação, requisitos, Product Backlog e relatórios de sprint |
-| [ProjetoDevOps-front](https://github.com/joaogabgr/ProjetoDevOps-front) | Este repositório: aplicação web |
-| [ProjetoDevOps-back](https://github.com/joaogabgr/ProjetoDevOps-back) | API, processamento e persistência dos dados |
+| Requisitos, atas e processo do time | [Confluence – espaço Vigia das Águas](https://projetodevops.atlassian.net/wiki/spaces/VIGIA) |
+| Histórias e subtarefas | [Jira – projeto SCRUM](https://projetodevops.atlassian.net/jira/software/projects/SCRUM/boards/1) (componente **Frontend**) |
+| Back-end (API) | [ProjetoDevOps-back](https://github.com/joaogabgr/ProjetoDevOps-back) |
 
-## Gestão
+## Branch, commit e PR
 
-- Board: [Jira - projeto SCRUM](https://projetodevops.atlassian.net/jira/software/projects/SCRUM/boards/1)
-- Requisitos e backlog completo: [README do repositório principal](https://github.com/joaogabgr/ProjetoDevOps#product-backlog)
+O fluxo completo está no [Processo do PO](https://projetodevops.atlassian.net/wiki/spaces/VIGIA/pages/524289).
 
-## Convenção de branch e commit
+- **Branch:** uma por subtarefa `[FRONT]` do Jira, criada pelo botão *Create branch*. Ex.: `SCRUM-61-front-tela-de-estacoes`.
+- **Commit:** `SCRUM-61 feat: descrição curta`. A chave faz o commit aparecer no painel *Development* da subtarefa.
+- **PR:** título começando com a chave.
+- **Release:** cada merge na `main` cria a release e a versão `front vX.Y.Z` no Jira.
 
-Toda branch e todo commit devem citar a chave da issue do Jira (`SCRUM-00`).
-É isso que faz o commit aparecer no painel *Development* da issue.
-
-```bash
-git checkout -b feature/SCRUM-36-dashboards-interativos
-git commit -m "SCRUM-36 feat: grafico de temperatura por estacao"
-```
-
-O título do Pull Request também deve começar com a chave.
-
-### Padrões de commit
-
-| Prefixo | Uso |
-|---------|-----|
-| feat | Usado para criação de nova funcionalidade; |
-| fix | Usado para corrigir algum problema no código e/ou funcionalidade (bugs); |
-| refactor | Usado para refatoração de código sem alterar sua funcionalidade, apenas melhoria; |
-| docs | Usado para atualizar documentações como o arquivo README.md; |
-| style | Usado para atualizar estilos e arquivos de estilização; |
+| Tipo | Uso |
+|---|---|
+| `feat` | Nova funcionalidade |
+| `fix` | Correção de bug |
+| `refactor` | Melhoria de código sem mudar comportamento |
+| `docs` | Documentação |
+| `style` | Estilos e formatação |
+| `test` | Testes |
