@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { messageOf, type Page } from '../../api/client';
 import { ROLE_LABEL, type User } from '../../api/types';
+import { useFeedback } from '../../components/Feedback';
 import { usersApi, type UserFilters } from './usersApi';
 
 export function UsersListPage() {
@@ -10,6 +11,7 @@ export function UsersListPage() {
   const filtersKey = JSON.stringify(filters);
   const [result, setResult] = useState<Page<User> | null>(null);
   const [error, setError] = useState('');
+  const feedback = useFeedback();
 
   const load = useCallback(async () => {
     setError('');
@@ -23,6 +25,26 @@ export function UsersListPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function toggleActive(user: User) {
+    try {
+      await usersApi.update(user.id, { active: !user.active });
+      feedback.success(user.active ? 'Usuário desativado.' : 'Usuário reativado.');
+      await load();
+    } catch (caught) {
+      feedback.error(messageOf(caught));
+    }
+  }
+
+  async function remove(user: User) {
+    try {
+      await usersApi.remove(user.id);
+      feedback.success('Usuário excluído.');
+      await load();
+    } catch (caught) {
+      feedback.error(messageOf(caught));
+    }
+  }
 
   return (
     <section className="page">
@@ -68,6 +90,12 @@ export function UsersListPage() {
                     <Link to={`/usuarios/${user.id}/editar`} state={{ user }}>
                       Editar
                     </Link>
+                    <button type="button" className="link-button" onClick={() => toggleActive(user)}>
+                      {user.active ? 'Desativar' : 'Reativar'}
+                    </button>
+                    <button type="button" className="link-button link-button--danger" onClick={() => remove(user)}>
+                      Excluir
+                    </button>
                   </td>
                 </tr>
               ))}
