@@ -67,7 +67,15 @@ export function ParameterForm({ mode, initial = EMPTY_PARAMETER, submitLabel, on
     <form className="form" onSubmit={submit} noValidate data-mode={mode}>
       <div className="form__grid">
         <Field id="typeJson" label="Chave" error={errors.typeJson} hint="Nome do campo no JSON da placa, ex.: nivel.">
-          <input id="typeJson" className="mono" value={values.typeJson} onChange={set('typeJson')} aria-describedby={describedBy('typeJson', errors.typeJson)} />
+          <input
+            id="typeJson"
+            className="mono"
+            value={values.typeJson}
+            onChange={set('typeJson')}
+            readOnly={mode === 'edit'}
+            aria-readonly={mode === 'edit'}
+            aria-describedby={describedBy('typeJson', errors.typeJson)}
+          />
         </Field>
         <Field id="name" label="Nome" error={errors.name}>
           <input id="name" value={values.name} onChange={set('name')} aria-describedby={describedBy('name', errors.name)} />
