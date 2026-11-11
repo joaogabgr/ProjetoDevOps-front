@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { FORBIDDEN_EVENT } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { can } from '../auth/permissions';
 import { MENU } from './menu';
@@ -9,6 +10,15 @@ export function AppLayout() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+
+  const navigate = useNavigate();
+
+  // Tela que o perfil não pode ver: a API responde 403 e a página de acesso negado aparece.
+  useEffect(() => {
+    const showDenied = () => navigate('/acesso-negado', { replace: true });
+    window.addEventListener(FORBIDDEN_EVENT, showDenied);
+    return () => window.removeEventListener(FORBIDDEN_EVENT, showDenied);
+  }, [navigate]);
 
   // No celular o menu fecha depois de escolher uma página.
   useEffect(() => setMenuOpen(false), [location.pathname]);
