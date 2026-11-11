@@ -1,12 +1,17 @@
 import { Route, Routes } from 'react-router-dom';
+import { RequireAuth } from './auth/RequireAuth';
 import { AppLayout } from './layout/AppLayout';
 import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
 
 export function App() {
   return (
     <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<HomePage />} />
+      <Route path="/entrar" element={<LoginPage />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<AppLayout />}>
+          <Route index element={<HomePage />} />
+        </Route>
       </Route>
     </Routes>
   );
