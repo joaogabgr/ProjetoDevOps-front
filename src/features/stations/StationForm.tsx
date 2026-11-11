@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { messageOf } from '../../api/client';
+import { fieldErrorsOf, messageOf } from '../../api/client';
 import { BIOME_LABEL, type Biome } from '../../api/types';
 import { describedBy, Field } from '../../components/Field';
 import { useFeedback } from '../../components/Feedback';
@@ -87,7 +87,13 @@ export function StationForm({ mode, initial = EMPTY_STATION, submitLabel, onSubm
     try {
       await onSubmit(values);
     } catch (caught) {
-      feedback.error(messageOf(caught));
+      // Erros de campo da API (409/422) aparecem ao lado do campo (RNF1 R3).
+      const fromApi = fieldErrorsOf(caught) as Errors;
+      if (Object.keys(fromApi).length > 0) {
+        setErrors(fromApi);
+      } else {
+        feedback.error(messageOf(caught));
+      }
     } finally {
       setSubmitting(false);
     }
