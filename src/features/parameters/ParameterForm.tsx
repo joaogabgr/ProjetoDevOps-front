@@ -14,6 +14,9 @@ export const EMPTY_PARAMETER: ParameterFormValues = { typeJson: '', name: '', un
 
 type Errors = Partial<Record<keyof ParameterFormValues, string>>;
 
+/** A chave vai gravada nas placas (RF3): minúsculas, números e "_". */
+const KEY_FORMAT = /^[a-z][a-z0-9_]{0,63}$/;
+
 interface ParameterFormProps {
   mode: 'create' | 'edit';
   initial?: ParameterFormValues;
@@ -33,6 +36,9 @@ export function ParameterForm({ mode, initial = EMPTY_PARAMETER, submitLabel, on
   async function submit(event: FormEvent) {
     event.preventDefault();
     const found: Errors = {};
+    if (mode === 'create' && !KEY_FORMAT.test(values.typeJson.trim())) {
+      found.typeJson = 'Use de 1 a 64 caracteres: comece com letra e use só minúsculas, números e "_" (ex.: vento_vel).';
+    }
     if (!values.name.trim()) found.name = 'Informe o nome do parâmetro.';
     if (!values.unit.trim()) found.unit = 'Informe a unidade.';
     const decimals = Number(values.numberOfDecimalCases);
