@@ -5,7 +5,7 @@ import { useAuth } from '../auth/AuthContext';
 import { Field } from '../components/Field';
 
 export function LoginPage() {
-  const { session, login } = useAuth();
+  const { session, endedBy, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? '/';
@@ -34,6 +34,11 @@ export function LoginPage() {
       <form className="login__card" onSubmit={submit} noValidate>
         <h1>Vigia das Águas</h1>
         <p className="login__subtitle">Entre com seu e-mail e senha.</p>
+        {endedBy === 'expired' && !error && (
+          <p className="login__info" role="status">
+            Sua sessão expirou. Entre novamente.
+          </p>
+        )}
         {error && (
           <p className="login__error" role="alert">
             {error}

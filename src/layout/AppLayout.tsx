@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 import { MENU } from './menu';
 
 /** Moldura das páginas logadas: cabeçalho, menu e conteúdo (RNF1 R1). */
 export function AppLayout() {
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -25,7 +27,12 @@ export function AppLayout() {
         <NavLink to="/" className="layout__brand">
           Vigia das Águas
         </NavLink>
-        <div className="layout__header-end" />
+        <div className="layout__header-end">
+          <span className="layout__user">{user?.name}</span>
+          <button type="button" className="layout__menu-button layout__logout" onClick={logout}>
+            Sair
+          </button>
+        </div>
       </header>
       <nav id="menu-principal" className={menuOpen ? 'layout__nav layout__nav--open' : 'layout__nav'} aria-label="Menu principal">
         <ul>
