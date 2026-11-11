@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { can } from '../auth/permissions';
 import { MENU } from './menu';
 
 /** Moldura das páginas logadas: cabeçalho, menu e conteúdo (RNF1 R1). */
@@ -36,7 +37,7 @@ export function AppLayout() {
       </header>
       <nav id="menu-principal" className={menuOpen ? 'layout__nav layout__nav--open' : 'layout__nav'} aria-label="Menu principal">
         <ul>
-          {MENU.map((item) => (
+          {MENU.filter((item) => can(user?.role, item.permission)).map((item) => (
             <li key={item.to}>
               <NavLink to={item.to}>{item.label}</NavLink>
             </li>

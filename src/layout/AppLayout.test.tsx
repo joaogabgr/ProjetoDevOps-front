@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router-dom';
+import { buildSession } from '../test/fixtures';
 import { renderWithProviders } from '../test/render';
 import { AppLayout } from './AppLayout';
 
@@ -12,6 +13,7 @@ function renderLayout() {
         <Route path="estacoes" element={<p>Lista de estações</p>} />
       </Route>
     </Routes>,
+    { session: buildSession({ role: 'ADMIN' }) },
   );
 }
 
