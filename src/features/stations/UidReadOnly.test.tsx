@@ -4,7 +4,8 @@ import { buildSession } from '../../test/fixtures';
 import { renderWithProviders } from '../../test/render';
 import { EMPTY_STATION, StationForm } from './StationForm';
 
-vi.mock('./stationsApi', () => ({ stationsApi: { communities: vi.fn().mockResolvedValue([]) } }));
+// Função comum, não vi.fn: o restoreMocks do Vitest zeraria o retorno antes de cada teste.
+vi.mock('./stationsApi', () => ({ stationsApi: { communities: async () => [] } }));
 
 describe('identificador na edição (SCRUM-156 — RF2 R1)', () => {
   it('na edição o identificador não pode ser alterado', async () => {
