@@ -1,8 +1,9 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { fieldErrorsOf, messageOf } from '../../api/client';
 import { BIOME_LABEL, type Biome } from '../../api/types';
 import { describedBy, Field } from '../../components/Field';
 import { useFeedback } from '../../components/Feedback';
+import { stationsApi } from './stationsApi';
 
 export interface StationFormValues {
   uuid: string;
@@ -73,6 +74,14 @@ export function StationForm({ mode, initial = EMPTY_STATION, submitLabel, onSubm
   const [values, setValues] = useState<StationFormValues>(initial);
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [communities, setCommunities] = useState<string[]>([]);
+
+  // Sugestões de comunidade (RF2 R3); se falhar, o campo continua livre.
+  useEffect(() => {
+    Promise.resolve()
+      .then(() => stationsApi.communities())
+      .then(setCommunities, () => setCommunities([]));
+  }, []);
 
   const set = (field: keyof StationFormValues) => (event: { target: { value: string } }) =>
     setValues((current) => ({ ...current, [field]: event.target.value }));
@@ -124,7 +133,19 @@ export function StationForm({ mode, initial = EMPTY_STATION, submitLabel, onSubm
           </select>
         </Field>
         <Field id="community" label="Comunidade" error={errors.community}>
-          <input id="community" value={values.community} onChange={set('community')} aria-describedby={describedBy('community', errors.community)} />
+          <input
+            id="community"
+            list="community-options"
+            autoComplete="off"
+            value={values.community}
+            onChange={set('community')}
+            aria-describedby={describedBy('community', errors.community)}
+          />
+          <datalist id="community-options">
+            {communities.map((community) => (
+              <option key={community} value={community} />
+            ))}
+          </datalist>
         </Field>
         <Field id="timezone" label="Fuso horário" error={errors.timezone}>
           <select id="timezone" value={values.timezone} onChange={set('timezone')}>
