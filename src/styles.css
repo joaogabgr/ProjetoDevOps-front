@@ -502,3 +502,24 @@ h1 {
   justify-content: flex-end;
   margin-top: 8px;
 }
+
+.sensors {
+  margin: 4px 0 14px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.sensors legend {
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.sensors__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
