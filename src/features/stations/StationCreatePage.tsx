@@ -10,7 +10,8 @@ export function StationCreatePage() {
   const navigate = useNavigate();
   const feedback = useFeedback();
   const { typeParameters, error: typeParametersError } = useTypeParameters();
-  const [typeParameterIds] = useState<string[]>([]);
+  const [typeParameterIds, setTypeParameterIds] = useState<string[]>([]);
+  const [sensorsError] = useState('');
 
   async function create(values: StationFormValues) {
     await stationsApi.create({ uuid: values.uuid.trim(), ...toStationPayload(values), typeParameterIds });
@@ -25,7 +26,13 @@ export function StationCreatePage() {
         <Link to="/estacoes">Voltar para a lista</Link>
       </header>
       <StationForm mode="create" submitLabel="Cadastrar estação" onSubmit={create}>
-        <SensorsField typeParameters={typeParameters} loadError={typeParametersError} />
+        <SensorsField
+          typeParameters={typeParameters}
+          loadError={typeParametersError}
+          selected={typeParameterIds}
+          onChange={setTypeParameterIds}
+          error={sensorsError}
+        />
       </StationForm>
     </section>
   );
