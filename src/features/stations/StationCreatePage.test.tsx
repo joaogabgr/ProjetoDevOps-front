@@ -2,12 +2,15 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router-dom';
 import { ApiError } from '../../api/client';
-import { buildSession, buildStation } from '../../test/fixtures';
+import { buildSession, buildStation, buildTypeParameter } from '../../test/fixtures';
 import { renderWithProviders } from '../../test/render';
 import { StationCreatePage } from './StationCreatePage';
 import { stationsApi } from './stationsApi';
 
 vi.mock('./stationsApi', () => ({ stationsApi: { create: vi.fn() } }));
+vi.mock('./useTypeParameters', () => ({
+  useTypeParameters: () => ({ typeParameters: [buildTypeParameter({ id: '7', name: 'Nível do Rio', unit: 'cm' })], error: '' }),
+}));
 
 function renderPage() {
   return renderWithProviders(
@@ -25,6 +28,8 @@ async function fillValid() {
   await userEvent.type(screen.getByLabelText('Latitude'), '-20.24');
   await userEvent.type(screen.getByLabelText('Longitude'), '-56.37');
   await userEvent.type(screen.getByLabelText('Comunidade'), 'São Benedito');
+  // Sem sensor o cadastro não é enviado (SCRUM-146).
+  await userEvent.click(screen.getByLabelText('Nível do Rio (cm)'));
 }
 
 describe('cadastro de estação (SCRUM-152 — RF2)', () => {
