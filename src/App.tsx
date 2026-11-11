@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { RequireAuth } from './auth/RequireAuth';
+import { StationCreatePage } from './features/stations/StationCreatePage';
 import { StationsListPage } from './features/stations/StationsListPage';
 import { AppLayout } from './layout/AppLayout';
 import { HomePage } from './pages/HomePage';
@@ -13,6 +14,7 @@ export function App() {
         <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
           <Route path="estacoes" element={<StationsListPage />} />
+          <Route path="estacoes/nova" element={<StationCreatePage />} />
         </Route>
       </Route>
     </Routes>
