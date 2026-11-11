@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import '../../components/filters.css';
 import { messageOf, type Page } from '../../api/client';
 import { Can } from '../../auth/Can';
+import { useConfirm } from '../../components/ConfirmDialog';
 import { useFeedback } from '../../components/Feedback';
 import { Pagination } from '../../components/Pagination';
 import { BIOME_LABEL, type Biome, type Station } from '../../api/types';
@@ -29,6 +30,7 @@ export function StationsListPage() {
   const [result, setResult] = useState<Page<Station> | null>(null);
   const [error, setError] = useState('');
   const feedback = useFeedback();
+  const confirm = useConfirm();
 
   const load = useCallback(async () => {
     setError('');
@@ -54,6 +56,14 @@ export function StationsListPage() {
   }
 
   async function remove(station: Station) {
+    const confirmed = await confirm({
+      title: 'Excluir estação',
+      message: `Excluir a estação ${station.uuid}? Esta ação não pode ser desfeita.`,
+      confirmLabel: 'Excluir',
+      danger: true,
+    });
+    if (!confirmed) return;
+
     try {
       await stationsApi.remove(station.id);
       feedback.success('Estação excluída.');
