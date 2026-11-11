@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { fieldErrorsOf, messageOf } from '../../api/client';
+import { ApiError, fieldErrorsOf, messageOf } from '../../api/client';
 import { describedBy, Field } from '../../components/Field';
 import { useFeedback } from '../../components/Feedback';
 
@@ -46,7 +46,7 @@ export function ParameterForm({ mode, initial = EMPTY_PARAMETER, submitLabel, on
     try {
       await onSubmit(values);
     } catch (caught) {
-      const fromApi = fieldErrorsOf(caught) as Errors;
+      const fromApi = { ...conflictField(caught), ...(fieldErrorsOf(caught) as Errors) };
       if (Object.keys(fromApi).length > 0) {
         setErrors(fromApi);
       } else {
@@ -88,4 +88,12 @@ export function ParameterForm({ mode, initial = EMPTY_PARAMETER, submitLabel, on
       </div>
     </form>
   );
+}
+
+/** O 409 do cadastro não diz o campo: a mensagem cita "chave" ou "nome" (RF3 R2). */
+function conflictField(error: unknown): Errors {
+  if (!(error instanceof ApiError) || error.status !== 409) return {};
+  if (/chave/i.test(error.message)) return { typeJson: error.message };
+  if (/nome/i.test(error.message)) return { name: error.message };
+  return {};
 }
