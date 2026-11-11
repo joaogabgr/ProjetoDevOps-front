@@ -10,6 +10,7 @@ import { StationCreatePage } from './features/stations/StationCreatePage';
 import { StationEditPage } from './features/stations/StationEditPage';
 import { StationsListPage } from './features/stations/StationsListPage';
 import { AppLayout } from './layout/AppLayout';
+import { AccessDeniedPage } from './pages/AccessDeniedPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 
@@ -20,6 +21,7 @@ export function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="acesso-negado" element={<AccessDeniedPage />} />
           <Route path="estacoes" element={<StationsListPage />} />
           <Route path="parametros" element={<ParametersListPage />} />
           <Route path="usuarios" element={<UsersListPage />} />
