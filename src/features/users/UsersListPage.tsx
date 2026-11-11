@@ -4,6 +4,7 @@ import { messageOf, type Page } from '../../api/client';
 import { ROLE_LABEL, type User } from '../../api/types';
 import { useFeedback } from '../../components/Feedback';
 import { usersApi, type UserFilters } from './usersApi';
+import { useConfirm } from '../../components/ConfirmDialog';
 
 export function UsersListPage() {
   const [params] = useSearchParams();
@@ -12,6 +13,7 @@ export function UsersListPage() {
   const [result, setResult] = useState<Page<User> | null>(null);
   const [error, setError] = useState('');
   const feedback = useFeedback();
+  const confirm = useConfirm();
 
   const load = useCallback(async () => {
     setError('');
@@ -37,6 +39,14 @@ export function UsersListPage() {
   }
 
   async function remove(user: User) {
+    const confirmed = await confirm({
+      title: 'Excluir usuário',
+      message: `Excluir o usuário ${user.name}? Ele perde o acesso ao sistema.`,
+      confirmLabel: 'Excluir',
+      danger: true,
+    });
+    if (!confirmed) return;
+
     try {
       await usersApi.remove(user.id);
       feedback.success('Usuário excluído.');

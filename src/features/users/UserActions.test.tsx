@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router-dom';
 import { ApiError } from '../../api/client';
@@ -8,6 +8,11 @@ import { UsersListPage } from './UsersListPage';
 import { usersApi } from './usersApi';
 
 vi.mock('./usersApi', () => ({ usersApi: { list: vi.fn(), update: vi.fn(), remove: vi.fn() } }));
+
+async function confirmDelete() {
+  await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }));
+  await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Excluir' }));
+}
 
 function renderWith(user: ReturnType<typeof buildUser>) {
   vi.mocked(usersApi.list).mockResolvedValue({ data: [user], meta: { total: 1, page: 1, perPage: 20, totalPages: 1 } });
@@ -34,7 +39,7 @@ describe('excluir e desativar usuário (SCRUM-83 — RF5)', () => {
     vi.mocked(usersApi.remove).mockRejectedValue(new ApiError(409, 'CONFLICT', 'Não é possível excluir o último administrador ativo.'));
     renderWith(buildUser({ id: 'u-1', role: 'ADMIN' }));
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }));
+    await confirmDelete();
 
     expect(await screen.findByText('Não é possível excluir o último administrador ativo.')).toBeInTheDocument();
   });
@@ -43,7 +48,7 @@ describe('excluir e desativar usuário (SCRUM-83 — RF5)', () => {
     vi.mocked(usersApi.remove).mockResolvedValue(undefined);
     renderWith(buildUser({ id: 'u-3' }));
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }));
+    await confirmDelete();
 
     expect(await screen.findByText('Usuário excluído.')).toBeInTheDocument();
     expect(usersApi.remove).toHaveBeenCalledWith('u-3');
