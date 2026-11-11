@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import { buildSession, buildUser } from '../../test/fixtures';
 import { renderWithProviders } from '../../test/render';
@@ -25,8 +25,10 @@ describe('lista de usuários (SCRUM-81 — RF5)', () => {
     );
 
     expect(await screen.findByText('Bia')).toBeInTheDocument();
-    expect(screen.getByText('Administrador')).toBeInTheDocument();
-    expect(screen.getByText('Agente comunitário')).toBeInTheDocument();
+    // Os perfis também são opções do filtro: confere dentro da tabela.
+    const table = within(screen.getByRole('table'));
+    expect(table.getByText('Administrador')).toBeInTheDocument();
+    expect(table.getByText('Agente comunitário')).toBeInTheDocument();
     expect(screen.getByText('São Benedito')).toBeInTheDocument();
     expect(screen.getByText('Desativado')).toBeInTheDocument();
     expect(screen.queryByText(/senha/i)).not.toBeInTheDocument();
