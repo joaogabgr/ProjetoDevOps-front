@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { messageOf } from '../../api/client';
 import { Can } from '../../auth/Can';
+import { useConfirm } from '../../components/ConfirmDialog';
 import { useFeedback } from '../../components/Feedback';
 import type { TypeParameter } from '../../api/types';
 import { parametersApi } from './parametersApi';
@@ -10,6 +11,7 @@ export function ParametersListPage() {
   const [items, setItems] = useState<TypeParameter[] | null>(null);
   const [error, setError] = useState('');
   const feedback = useFeedback();
+  const confirm = useConfirm();
 
   const load = useCallback(async () => {
     setError('');
@@ -25,6 +27,14 @@ export function ParametersListPage() {
   }, [load]);
 
   async function remove(parameter: TypeParameter) {
+    const confirmed = await confirm({
+      title: 'Excluir parâmetro',
+      message: `Excluir o parâmetro ${parameter.name} (${parameter.typeJson})? Ele também será desligado das estações.`,
+      confirmLabel: 'Excluir',
+      danger: true,
+    });
+    if (!confirmed) return;
+
     try {
       await parametersApi.remove(parameter.id);
       feedback.success('Parâmetro excluído.');
