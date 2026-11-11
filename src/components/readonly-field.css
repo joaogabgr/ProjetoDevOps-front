@@ -1,0 +1,4 @@
+.field input[readonly] {
+  background: #f4f5f7;
+  color: var(--color-muted);
+}
