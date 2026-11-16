@@ -3,6 +3,7 @@ import { fieldErrorsOf, messageOf } from '../../api/client';
 import { ROLE_LABEL, type Role } from '../../api/types';
 import { describedBy, Field } from '../../components/Field';
 import { useFeedback } from '../../components/Feedback';
+import { credentialErrors } from './validators';
 
 export interface UserFormValues {
   name: string;
@@ -35,7 +36,7 @@ export function UserForm({ mode, initial = EMPTY_USER, submitLabel, onSubmit }: 
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const found: Errors = {};
+    const found: Errors = credentialErrors(values, mode);
     if (values.name.trim().length < 3) found.name = 'O nome deve ter ao menos 3 caracteres.';
     if (values.role === 'COMMUNITY_AGENT' && !values.community.trim()) {
       found.community = 'Informe a comunidade do agente comunitário.';
