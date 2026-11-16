@@ -11,9 +11,14 @@ export function StationCreatePage() {
   const feedback = useFeedback();
   const { typeParameters, error: typeParametersError } = useTypeParameters();
   const [typeParameterIds, setTypeParameterIds] = useState<string[]>([]);
-  const [sensorsError] = useState('');
+  const [sensorsError, setSensorsError] = useState('');
 
   async function create(values: StationFormValues) {
+    if (typeParameterIds.length === 0) {
+      setSensorsError('A estação precisa de ao menos um parâmetro.');
+      return;
+    }
+    setSensorsError('');
     await stationsApi.create({ uuid: values.uuid.trim(), ...toStationPayload(values), typeParameterIds });
     feedback.success('Estação cadastrada.');
     navigate('/estacoes');

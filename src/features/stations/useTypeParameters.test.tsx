@@ -7,7 +7,12 @@ import { StationCreatePage } from './StationCreatePage';
 function mockFetch(status: number, body: unknown) {
   vi.stubGlobal(
     'fetch',
-    vi.fn().mockResolvedValue(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })),
+    // Cada chamada recebe a própria resposta; a de comunidades (SCRUM-153) volta vazia.
+    vi.fn().mockImplementation(async (url: string) =>
+      url.includes('/communities')
+        ? new Response(JSON.stringify({ data: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+        : new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }),
+    ),
   );
 }
 
