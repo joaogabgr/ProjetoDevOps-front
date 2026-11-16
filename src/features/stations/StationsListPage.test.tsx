@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import { ApiError } from '../../api/client';
 import { buildSession, buildStation } from '../../test/fixtures';
@@ -35,7 +35,8 @@ describe('lista de estações (SCRUM-61 — RF2)', () => {
 
     expect(await screen.findByText('Córrego Fundo')).toBeInTheDocument();
     expect(screen.getByText('PCD-CER-02')).toBeInTheDocument();
-    expect(screen.getByText('Cerrado')).toBeInTheDocument();
+    // "Cerrado" também é opção do filtro de bioma: confere dentro da tabela.
+    expect(within(screen.getByRole('table')).getByText('Cerrado')).toBeInTheDocument();
     expect(screen.getByText('Desativada')).toBeInTheDocument();
     expect(screen.getByText('Ativa')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Nova estação' })).toHaveAttribute('href', '/estacoes/nova');
