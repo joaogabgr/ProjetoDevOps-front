@@ -37,6 +37,9 @@ export function UserForm({ mode, initial = EMPTY_USER, submitLabel, onSubmit }: 
     event.preventDefault();
     const found: Errors = {};
     if (values.name.trim().length < 3) found.name = 'O nome deve ter ao menos 3 caracteres.';
+    if (values.role === 'COMMUNITY_AGENT' && !values.community.trim()) {
+      found.community = 'Informe a comunidade do agente comunitário.';
+    }
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
@@ -90,9 +93,11 @@ export function UserForm({ mode, initial = EMPTY_USER, submitLabel, onSubmit }: 
             ))}
           </select>
         </Field>
-        <Field id="community" label="Comunidade" error={errors.community}>
-          <input id="community" value={values.community} onChange={set('community')} aria-describedby={describedBy('community', errors.community)} />
-        </Field>
+        {values.role === 'COMMUNITY_AGENT' && (
+          <Field id="community" label="Comunidade" error={errors.community} hint="O agente vê só os dados da sua comunidade.">
+            <input id="community" value={values.community} onChange={set('community')} aria-describedby={describedBy('community', errors.community)} />
+          </Field>
+        )}
       </div>
       <div className="form__actions">
         <button type="submit" className="button" disabled={submitting}>
