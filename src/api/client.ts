@@ -27,6 +27,9 @@ type TokenProvider = () => string | null;
 let tokenProvider: TokenProvider = () => null;
 let onUnauthorized: (error: ApiError) => void = () => {};
 
+/** Evento disparado quando a API recusa a leitura de uma tela por perfil (403). */
+export const FORBIDDEN_EVENT = 'vigia:acesso-negado';
+
 /** Liga o cliente à sessão: de onde vem o token e o que fazer quando a API responde 401. */
 export function configureApi(options: { token?: TokenProvider; onUnauthorized?: (error: ApiError) => void }) {
   if (options.token) tokenProvider = options.token;
@@ -67,6 +70,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     );
     // O login devolve 401 para senha errada; só a sessão vencida deve derrubar o usuário.
     if (response.status === 401 && path !== '/auth/login') onUnauthorized(error);
+    if (response.status === 403 && method === 'GET') window.dispatchEvent(new CustomEvent(FORBIDDEN_EVENT));
     throw error;
   }
 
