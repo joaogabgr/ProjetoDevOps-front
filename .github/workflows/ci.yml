@@ -1,0 +1,66 @@
+name: CI
+
+# Verificação de todo PR e de todo merge (RNF3). Os jobs titulo, typecheck, testes
+# e build são verificações obrigatórias nas branches develop, homolog e main.
+on:
+  pull_request:
+    branches: [develop, homolog, main]
+  push:
+    branches: [develop, homolog, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # O squash usa o título do PR como mensagem do commit: sem a chave, o código perde
+  # a ligação com o Jira e não entra na release. Promoções (homolog, main) não precisam.
+  titulo:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Título começa com a chave do Jira
+        if: github.base_ref == 'develop'
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ ! "$TITLE" =~ ^SCRUM-[0-9]+-rn?f-[0-9]+- ]]; then
+            echo "::error::O título do PR precisa ser o nome da branch, ex.: SCRUM-61-rf-2-tela-de-lista-de-estacoes"
+            exit 1
+          fi
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  testes:
+    needs: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  build:
+    needs: testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
