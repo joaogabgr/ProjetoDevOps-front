@@ -41,7 +41,7 @@ describe('menus e botões por perfil (SCRUM-85 — RF9 R7)', () => {
     renderWithProviders(<App />, { route: '/estacoes', session: buildSession({ role: 'TECHNICIAN' }) });
 
     expect(await screen.findByRole('link', { name: 'Nova estação' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Excluir' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Excluir' })).toBeInTheDocument();
   });
 
   it('a matriz é a mesma do back', () => {

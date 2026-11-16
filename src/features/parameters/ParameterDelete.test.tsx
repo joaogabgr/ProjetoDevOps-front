@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router-dom';
 import { ApiError } from '../../api/client';
@@ -8,6 +8,11 @@ import { ParametersListPage } from './ParametersListPage';
 import { parametersApi } from './parametersApi';
 
 vi.mock('./parametersApi', () => ({ parametersApi: { list: vi.fn(), remove: vi.fn() } }));
+
+async function confirmDelete() {
+  await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }));
+  await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Excluir' }));
+}
 
 function renderPage() {
   return renderWithProviders(
@@ -24,7 +29,7 @@ describe('excluir parâmetro (SCRUM-72 — RF3 R5)', () => {
     vi.mocked(parametersApi.remove).mockResolvedValue(undefined);
     renderPage();
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }));
+    await confirmDelete();
 
     expect(await screen.findByText('Parâmetro excluído.')).toBeInTheDocument();
     expect(parametersApi.remove).toHaveBeenCalledWith('3');
@@ -36,7 +41,7 @@ describe('excluir parâmetro (SCRUM-72 — RF3 R5)', () => {
     vi.mocked(parametersApi.remove).mockRejectedValue(new ApiError(409, 'CONFLICT', 'Parâmetro com leituras não pode ser excluído.'));
     renderPage();
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }));
+    await confirmDelete();
 
     expect(await screen.findByText('Parâmetro com leituras não pode ser excluído.')).toBeInTheDocument();
   });

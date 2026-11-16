@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { fieldErrorsOf, messageOf } from '../../api/client';
+import { ApiError, fieldErrorsOf, messageOf } from '../../api/client';
 import { describedBy, Field } from '../../components/Field';
 import { useFeedback } from '../../components/Feedback';
 
@@ -13,6 +13,9 @@ export interface ParameterFormValues {
 export const EMPTY_PARAMETER: ParameterFormValues = { typeJson: '', name: '', unit: '', numberOfDecimalCases: '2' };
 
 type Errors = Partial<Record<keyof ParameterFormValues, string>>;
+
+/** A chave vai gravada nas placas (RF3): minúsculas, números e "_". */
+const KEY_FORMAT = /^[a-z][a-z0-9_]{0,63}$/;
 
 interface ParameterFormProps {
   mode: 'create' | 'edit';
@@ -33,6 +36,9 @@ export function ParameterForm({ mode, initial = EMPTY_PARAMETER, submitLabel, on
   async function submit(event: FormEvent) {
     event.preventDefault();
     const found: Errors = {};
+    if (mode === 'create' && !KEY_FORMAT.test(values.typeJson.trim())) {
+      found.typeJson = 'Use de 1 a 64 caracteres: comece com letra e use só minúsculas, números e "_" (ex.: vento_vel).';
+    }
     if (!values.name.trim()) found.name = 'Informe o nome do parâmetro.';
     if (!values.unit.trim()) found.unit = 'Informe a unidade.';
     const decimals = Number(values.numberOfDecimalCases);
@@ -46,7 +52,7 @@ export function ParameterForm({ mode, initial = EMPTY_PARAMETER, submitLabel, on
     try {
       await onSubmit(values);
     } catch (caught) {
-      const fromApi = fieldErrorsOf(caught) as Errors;
+      const fromApi = { ...conflictField(caught), ...(fieldErrorsOf(caught) as Errors) };
       if (Object.keys(fromApi).length > 0) {
         setErrors(fromApi);
       } else {
@@ -61,7 +67,15 @@ export function ParameterForm({ mode, initial = EMPTY_PARAMETER, submitLabel, on
     <form className="form" onSubmit={submit} noValidate data-mode={mode}>
       <div className="form__grid">
         <Field id="typeJson" label="Chave" error={errors.typeJson} hint="Nome do campo no JSON da placa, ex.: nivel.">
-          <input id="typeJson" className="mono" value={values.typeJson} onChange={set('typeJson')} aria-describedby={describedBy('typeJson', errors.typeJson)} />
+          <input
+            id="typeJson"
+            className="mono"
+            value={values.typeJson}
+            onChange={set('typeJson')}
+            readOnly={mode === 'edit'}
+            aria-readonly={mode === 'edit'}
+            aria-describedby={describedBy('typeJson', errors.typeJson)}
+          />
         </Field>
         <Field id="name" label="Nome" error={errors.name}>
           <input id="name" value={values.name} onChange={set('name')} aria-describedby={describedBy('name', errors.name)} />
@@ -88,4 +102,12 @@ export function ParameterForm({ mode, initial = EMPTY_PARAMETER, submitLabel, on
       </div>
     </form>
   );
+}
+
+/** O 409 do cadastro não diz o campo: a mensagem cita "chave" ou "nome" (RF3 R2). */
+function conflictField(error: unknown): Errors {
+  if (!(error instanceof ApiError) || error.status !== 409) return {};
+  if (/chave/i.test(error.message)) return { typeJson: error.message };
+  if (/nome/i.test(error.message)) return { name: error.message };
+  return {};
 }

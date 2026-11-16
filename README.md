@@ -1,40 +1,46 @@
-# ProjetoDevOps - Front-end
+# Vigia das Águas – Front-end
 
-Interface web da plataforma de monitoramento ambiental da Tecsus: visualização
-dos dados das estações meteorológicas, dashboards interativos, gestão de
-estações, parâmetros, alertas e usuários.
+Aplicação web do sistema de monitoramento comunitário e prevenção de enchentes do Instituto Vigia das Águas: painéis das estações, cadastros de estações, parâmetros, regras de alerta e usuários, relatórios e o painel público do nível do rio.
 
-## Repositórios do projeto
+## Onde está cada coisa
 
-| Repositório | Conteúdo |
+| O quê | Onde |
 |---|---|
-| [ProjetoDevOps](https://github.com/joaogabgr/ProjetoDevOps) | Documentação, requisitos, Product Backlog e relatórios de sprint |
-| [ProjetoDevOps-front](https://github.com/joaogabgr/ProjetoDevOps-front) | Este repositório: aplicação web |
-| [ProjetoDevOps-back](https://github.com/joaogabgr/ProjetoDevOps-back) | API, processamento e persistência dos dados |
+| Requisitos, atas e processo do time | [Confluence – espaço Vigia das Águas](https://projetodevops.atlassian.net/wiki/spaces/VIGIA) |
+| Histórias e tarefas | [Jira – projeto SCRUM](https://projetodevops.atlassian.net/jira/software/projects/SCRUM/boards/1) (componente **Frontend**) |
+| Back-end (API) | [ProjetoDevOps-back](https://github.com/joaogabgr/ProjetoDevOps-back) |
 
-## Gestão
+## Como rodar
 
-- Board: [Jira - projeto SCRUM](https://projetodevops.atlassian.net/jira/software/projects/SCRUM/boards/1)
-- Requisitos e backlog completo: [README do repositório principal](https://github.com/joaogabgr/ProjetoDevOps#product-backlog)
-
-## Convenção de branch e commit
-
-Toda branch e todo commit devem citar a chave da issue do Jira (`SCRUM-00`).
-É isso que faz o commit aparecer no painel *Development* da issue.
+Requer Node 20. A API (repositório back) precisa estar rodando na porta 3000.
 
 ```bash
-git checkout -b feature/SCRUM-36-dashboards-interativos
-git commit -m "SCRUM-36 feat: grafico de temperatura por estacao"
+npm ci
+npm run dev      # http://localhost:5173, com /api repassado para a API
 ```
 
-O título do Pull Request também deve começar com a chave.
+| Comando | O que faz |
+|---|---|
+| `npm test` | Testes (Vitest + Testing Library) |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Checagem de tipos |
+| `npm run build` | Gera o `dist/` para publicar |
 
-### Padrões de commit
+## Branch, commit e PR
 
-| Prefixo | Uso |
-|---------|-----|
-| feat | Usado para criação de nova funcionalidade; |
-| fix | Usado para corrigir algum problema no código e/ou funcionalidade (bugs); |
-| refactor | Usado para refatoração de código sem alterar sua funcionalidade, apenas melhoria; |
-| docs | Usado para atualizar documentações como o arquivo README.md; |
-| style | Usado para atualizar estilos e arquivos de estilização; |
+O fluxo completo está no [Processo do PO](https://projetodevops.atlassian.net/wiki/spaces/VIGIA/pages/524289).
+
+- **Branch:** uma por tarefa `[FRONT]` do Jira (componente Frontend), a partir da `develop`, com a chave e o requisito: `SCRUM-NN-rf-N-descricao`. Ex.: `SCRUM-61-rf-2-tela-de-lista-de-estacoes`.
+- **Commit:** `SCRUM-61 feat: descrição curta`, ao menos dois por branch. A chave faz o commit aparecer no painel *Development* da tarefa.
+- **PR:** para a `develop`, com o título igual ao nome da branch (o CI confere). No squash, a mensagem do commit sai com esse nome.
+- **Regras:** `develop`, `homolog` e `main` só aceitam PR com o CI verde e a branch atualizada; a `main` também precisa de 1 aprovação.
+- **Release:** cada merge na `main` cria a release e a versão `front vX.Y.Z` no Jira.
+
+| Tipo | Uso |
+|---|---|
+| `feat` | Nova funcionalidade |
+| `fix` | Correção de bug |
+| `refactor` | Melhoria de código sem mudar comportamento |
+| `docs` | Documentação |
+| `style` | Estilos e formatação |
+| `test` | Testes |
