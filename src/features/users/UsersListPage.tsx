@@ -1,13 +1,28 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import '../../components/filters.css';
 import { messageOf, type Page } from '../../api/client';
-import { ROLE_LABEL, type User } from '../../api/types';
+import { ROLE_LABEL, type Role, type User } from '../../api/types';
+import { Pagination } from '../../components/Pagination';
 import { useFeedback } from '../../components/Feedback';
 import { usersApi, type UserFilters } from './usersApi';
 
 export function UsersListPage() {
-  const [params] = useSearchParams();
-  const filters: UserFilters = { page: Number(params.get('pagina') ?? 1) };
+  const [params, setParams] = useSearchParams();
+  const filters: UserFilters = {
+    page: Number(params.get('pagina') ?? 1),
+    name: params.get('nome') ?? '',
+    role: (params.get('perfil') ?? '') as Role | '',
+    community: params.get('comunidade') ?? '',
+  };
+
+  function setParam(key: string, value: string, resetPage = true) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    if (resetPage) next.delete('pagina');
+    setParams(next);
+  }
   const filtersKey = JSON.stringify(filters);
   const [result, setResult] = useState<Page<User> | null>(null);
   const [error, setError] = useState('');
@@ -54,6 +69,28 @@ export function UsersListPage() {
           Novo usuário
         </Link>
       </header>
+      <form className="filters" role="search" onSubmit={(event) => event.preventDefault()}>
+        <label>
+          Nome
+          <input value={filters.name} onChange={(event) => setParam('nome', event.target.value)} />
+        </label>
+        <label>
+          Perfil
+          <select value={filters.role} onChange={(event) => setParam('perfil', event.target.value)}>
+            <option value="">Todos</option>
+            {Object.entries(ROLE_LABEL).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Comunidade
+          <input value={filters.community} onChange={(event) => setParam('comunidade', event.target.value)} />
+        </label>
+      </form>
+
       {error && (
         <p className="page-error" role="alert">
           {error}
@@ -102,6 +139,14 @@ export function UsersListPage() {
             </tbody>
           </table>
         </div>
+      )}
+      {result && (
+        <Pagination
+          page={result.meta.page}
+          totalPages={result.meta.totalPages}
+          total={result.meta.total}
+          onChange={(next) => setParam('pagina', String(next), false)}
+        />
       )}
     </section>
   );
