@@ -1,0 +1,72 @@
+name: Deploy
+
+# Publica o front no Firebase Hosting a cada merge na homolog (RNF4).
+# Roda o CI inteiro de novo sobre o código mesclado e só publica se ele passar.
+# O site repassa /api ao Cloud Run do mesmo ambiente (firebase.json), então o build é o mesmo em todo ambiente.
+# Configuração da nuvem: infra/README.md do repositório back. Arquitetura: Confluence › Deploy e ambientes.
+on:
+  push:
+    branches: [homolog]
+
+permissions:
+  contents: read
+  id-token: write # Workload Identity Federation: o Google confia no token do GitHub, sem chave guardada
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: ci
+    # Enquanto a nuvem não está configurada (infra/setup-gcp.sh no back), o deploy é pulado e o pipeline segue verde.
+    if: vars.GCP_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    environment:
+      name: homolog
+      url: https://${{ vars.FIREBASE_SITE }}.web.app
+    env:
+      TARGET: homolog
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      SITE: ${{ vars.FIREBASE_SITE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # Grava as credenciais temporárias num arquivo que o firebase-tools lê sozinho.
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - name: Publicar no Firebase Hosting
+        run: |
+          npx --yes firebase-tools@13 target:apply hosting "$TARGET" "$SITE" --project "$PROJECT"
+          npx --yes firebase-tools@13 deploy --only "hosting:$TARGET" --project "$PROJECT" \
+            --non-interactive --message "$GITHUB_SHA"
+
+      # RNF4 R4: a página abre e o /api do site chega na API do mesmo ambiente com o banco ok.
+      - name: Smoke
+        run: |
+          URL="https://$SITE.web.app"
+          for i in $(seq 1 12); do
+            page=$(curl -sS --max-time 10 "$URL/" || true)
+            health=$(curl -sS --max-time 10 "$URL/api/health" || true)
+            if echo "$page" | grep -q '<div id="root">' && echo "$health" | grep -q '"db":"ok"'; then
+              echo "Front de $TARGET no ar: $URL" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::$URL não respondeu em 60 s. /api/health: $health"
+          exit 1
