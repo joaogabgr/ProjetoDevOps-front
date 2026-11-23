@@ -13,7 +13,7 @@
           "source": "/api/**",
           "run": {
             "serviceId": "vigia-api-homolog",
-            "region": "us-east1"
+            "region": "southamerica-east1"
           }
         },
         {
@@ -55,7 +55,7 @@
           "source": "/api/**",
           "run": {
             "serviceId": "vigia-api",
-            "region": "us-east1"
+            "region": "southamerica-east1"
           }
         },
         {
