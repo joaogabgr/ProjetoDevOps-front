@@ -1,16 +1,16 @@
 name: Deploy
 
-# Publica o front no Firebase Hosting a cada merge na homolog (RNF4).
+# Publica o front no Firebase Hosting a cada merge na homolog (homologação) e na main (produção) (RNF4).
+# Na main, a release só é criada depois que a produção passa no smoke.
 # Roda o CI inteiro de novo sobre o código mesclado e só publica se ele passar.
 # O site repassa /api ao Cloud Run do mesmo ambiente (firebase.json), então o build é o mesmo em todo ambiente.
 # Configuração da nuvem: infra/README.md do repositório back. Arquitetura: Confluence › Deploy e ambientes.
 on:
   push:
-    branches: [homolog]
+    branches: [homolog, main]
 
 permissions:
   contents: read
-  id-token: write # Workload Identity Federation: o Google confia no token do GitHub, sem chave guardada
 
 concurrency:
   group: deploy-${{ github.ref_name }}
@@ -25,11 +25,14 @@ jobs:
     # Enquanto a nuvem não está configurada (infra/setup-gcp.sh no back), o deploy é pulado e o pipeline segue verde.
     if: vars.GCP_PROJECT_ID != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Workload Identity Federation: o Google confia no token do GitHub, sem chave guardada
     environment:
-      name: homolog
+      name: ${{ github.ref_name == 'main' && 'production' || 'homolog' }}
       url: https://${{ vars.FIREBASE_SITE }}.web.app
     env:
-      TARGET: homolog
+      TARGET: ${{ github.ref_name == 'main' && 'production' || 'homolog' }}
       PROJECT: ${{ vars.GCP_PROJECT_ID }}
       SITE: ${{ vars.FIREBASE_SITE }}
     steps:
