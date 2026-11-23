@@ -4,3 +4,8 @@ coverage/
 *.tsbuildinfo
 .env
 .env.local
+
+# Firebase (o deploy gera o .firebaserc no Actions)
+.firebase/
+.firebaserc
+firebase-debug.log
