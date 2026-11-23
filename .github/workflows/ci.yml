@@ -2,14 +2,16 @@ name: CI
 
 # Verificação de todo PR e de todo merge (RNF3). Os jobs titulo, typecheck, testes
 # e build são verificações obrigatórias nas branches develop, homolog e main.
+# No merge na homolog, quem roda este CI é o deploy.yml, antes de publicar.
 on:
   pull_request:
     branches: [develop, homolog, main]
   push:
-    branches: [develop, homolog, main]
+    branches: [develop, main]
+  workflow_call:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
