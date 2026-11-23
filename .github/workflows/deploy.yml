@@ -73,3 +73,16 @@ jobs:
           done
           echo "::error::$URL não respondeu em 60 s. /api/health: $health"
           exit 1
+
+  # RNF4 R2: release e versão no Jira depois da produção no ar. Se a nuvem ainda não
+  # estiver configurada (deploy pulado), a release sai assim mesmo.
+  release:
+    needs: [ci, deploy]
+    if: >-
+      always() && github.ref_name == 'main' && needs.ci.result == 'success' &&
+      (needs.deploy.result == 'success' || needs.deploy.result == 'skipped')
+    permissions:
+      contents: write
+      pull-requests: read
+    uses: ./.github/workflows/release.yml
+    secrets: inherit
